@@ -1,0 +1,68 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+  <h2>{{ listing.title }}</h2>
+  <p>{{ listing.description }}</p>
+  <p>Current Price: {{ listing.current_bid }}</p>
+  {% if listing.image_url %}
+    <img src="{{ listing.image_url }}" alt="{{ listing.title }}">
+  {% endif %}
+  <p>Category: {{ listing.category.name }}</p>
+  <p>Created By: {{ listing.created_by.username }}</p>
+  <p>Created At: {{ listing.created_at }}</p>
+
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if user.is_authenticated %}
+    {% if is_in_watchlist %}
+      <form action="{% url 'remove_from_watchlist' listing.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Remove from Watchlist</button>
+      </form>
+    {% else %}
+      <form action="{% url 'add_to_watchlist' listing.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Add to Watchlist</button>
+      </form>
+    {% endif %}
+
+    {% if listing.active %}
+      <h3>Place a Bid</h3>
+      <form method="post">
+        {% csrf_token %}
+        {{ bid_form.as_p }}
+        <button type="submit" name="bid">Place Bid</button>
+      </form>
+    {% else %}
+      <p>The auction is closed.</p>
+      {% if highest_bid and highest_bid.bidder == user %}
+        <p>Congratulations! You have won this auction.</p>
+      {% endif %}
+    {% endif %}
+
+    {% if listing.created_by == user and listing.active %}
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="close_auction">Close Auction</button>
+      </form>
+    {% endif %}
+
+    <h3>Add a Comment</h3>
+    <form method="post">
+      {% csrf_token %}
+      {{ comment_form.as_p }}
+      <button type="submit" name="comment">Add Comment</button>
+    </form>
+  {% endif %}
+
+  <h3>Comments</h3>
+  {% for comment in comments %}
+    <p>{{ comment.commenter.username }}: {{ comment.comment_text }}</p>
+  {% endfor %}
+{% endblock %}

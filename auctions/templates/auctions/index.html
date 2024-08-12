@@ -1,0 +1,26 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+  <h2>Active Listings</h2>
+  <div class="listings">
+    {% for listing in listings %}
+      <div class="listing">
+        <h3><a href="{% url 'listing_detail' listing.id %}">{{ listing.title }}</a></h3>
+        <p>{{ listing.description }}</p>
+        <p>Current Price: {{ listing.current_bid }}</p>
+        {% if listing.image_url %}
+          <img src="{{ listing.image_url }}" alt="{{ listing.title }}">
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if won_listings %}
+    <h3>You have won the following auctions:</h3>
+    <ul>
+      {% for bid in won_listings %}
+        <li>{{ bid.listing.title }} - Final Bid: {{ bid.bid_amount }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endblock %}
